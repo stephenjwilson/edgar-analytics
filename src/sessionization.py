@@ -16,8 +16,6 @@ Example:
         sessionizationObj.run()
 """
 
-import datetime
-
 __author__ = "Stephen J. Wilson"
 __version__ = "1.0.1"
 __email__ = "contact@stephenjwilson.com"
@@ -26,7 +24,10 @@ import urllib.request
 import zipfile
 import io
 import os
-
+import re
+import sys
+import datetime
+from IPython import embed
 
 class Sessionization(object):
     """Processes the EDGAR log files.
@@ -77,9 +78,8 @@ class Sessionization(object):
         self.header = ''
 
         # Private Constants
-        self._extracted_fields = ['ip', 'date', 'time', 'cik', 'accession', 'extention']
-        self._time_format = '%H:%M:%S'
-        self._date_format = '%Y-%m-%d'
+        self._extracted_fields = ['ip', 'date', 'time']# 'cik', 'accession', 'extention']
+        self._reDT = re.compile(r'(\d{4})-(\d{2})-(\d{2})(\d{2}):(\d{2}):(\d{2})')
         self._quote_character = '"'
         self._delimiter = ','
 
@@ -107,8 +107,7 @@ class Sessionization(object):
             row_data[field] = row[header_map[field]]  # Access the appropriate row according to the header
 
         # Get datetime objects from the date and time information
-        datetime_object = datetime.datetime.strptime('{} {}'.format(row_data['date'], row_data['time']),
-                                                     '{} {}'.format(self._date_format, self._time_format))
+        datetime_object = datetime.datetime(*map(int, self._reDT.match(row_data['date']+row_data['time']).groups()))
         row_data['dt'] = datetime_object
         return row_data
 
@@ -129,7 +128,7 @@ class Sessionization(object):
         for field in self._extracted_fields:
             header_map[field] = self._extracted_fields.index(field)
 
-        # return cleaned data
+        # Return cleaned data
         for row in stream:
             yield self.clean_row(row, header_map)
 
@@ -162,7 +161,7 @@ class SessionSet(object):
         """
         # Close any active sessions
         for session in self.sessions:
-            self.output_file_fh.write(session.close_session())
+            self.output_file_fh.write(str(session))
         # Close the file
         self.output_file_fh.close()
         # Delete the data
@@ -180,6 +179,13 @@ class SessionSet(object):
         # Set the current time if not set before. Will be used to clean out old sessions
         if isinstance(self.current_time, type(None)):
             self.current_time = row['dt']
+
+        # Clean out old sessions if the time-stamp has changed
+        row_time = row['dt']
+        if row_time != self.current_time:
+            self.current_time = row['dt']
+            self.update_sessions()
+
         # Try to get the appropriate session if it exists
         try:  # Get existing session
             ind = self.index[row['ip']]  # get the index of the ip
@@ -189,12 +195,6 @@ class SessionSet(object):
             session = Session(self.inactivity_period, row['ip'], row['dt'])
             self.sessions.append(session)
             self.index[row['ip']] = len(self.sessions) - 1  # Add to the index
-
-        # Clean out old sessions if the time-stamp has changed
-        row_time = session.time_last
-        if row_time != self.current_time:
-            self.current_time = row['dt']
-            self.update_sessions()
 
     def update_sessions(self):
         """
@@ -211,8 +211,7 @@ class SessionSet(object):
                 to_del.append(i)
 
         # delete sessions that ended, re-index sessions
-        self.sessions = [v for i, v in enumerate(self.sessions) if i not in to_del] \
-            # TODO: potential improvement needed at scale
+        self.sessions = [v for i, v in enumerate(self.sessions) if i not in to_del]
         self.index = {v.ip: i for i, v in enumerate(self.sessions)}  # update the index
 
 
@@ -221,8 +220,7 @@ class Session(object):
     The Session class keeps track of all relevant data for a session.
     """
 
-    def __init__(self, inactivity_period, ip, time_first, duration=1, document_number=1,
-                 time_format='%H:%M:%S', date_format='%Y-%m-%d'):  # TODO: ensure formats are passes
+    def __init__(self, inactivity_period, ip, time_first, duration=1, document_number=1):
         """
         The constructor for the Session class, which keeps track of a single session.
         See (datetime documentation)[https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior] for
@@ -242,22 +240,15 @@ class Session(object):
         self.time_last = time_first
         self.duration = duration
         self.document_number = document_number
-        self.time_format = time_format
-        self.date_format = date_format
-        self.quote_character = '"'
         self.delimiter = ','
 
-    def _format_csv(self, s, ):
+    def _format_datetime(self, s):
         """
-        Formats a field for a csv file by quoting it if necessary.
-        :param s: The field to be formatted
-        :return: a csv-safe field.
+        A faster version of datetimeObj.strftime()
+        :param s: A datetime object
+        :return: A string formatted with the date and the time
         """
-        s = '{}'.format(s)  # make sure s is a string
-        if ',' in s:
-            return '{}{}{}'.format(self.quote_character, s, self.quote_character)
-        else:
-            return s
+        return '%d-%02d-%02d %02d:%02d:%02d' % (s.year, s.month, s.day, s.hour, s.minute, s.second)
 
     def __repr__(self):
         """
@@ -271,18 +262,10 @@ class Session(object):
         Returns the string representation of a session in a csv-safe manner.
         :return: The string representation of a session
         """
-        data = [self._format_csv(x) for x in
-                [self.ip, self.time_first.strftime('{} {}'.format(self.date_format, self.time_format)),
-                 self.time_last.strftime('{} {}'.format(self.date_format, self.time_format)),
-                 self.duration, self.document_number]]
-        return self.delimiter.join(data) + '\n'
-
-    def close_session(self):
-        """
-        This returns the representation of the session. # TODO: Redundant?
-        :return:
-        """
-        return str(self)
+        data = '%s,%s,%s,%s,%d\n' % (self.ip,
+                                     self._format_datetime(self.time_first), self._format_datetime(self.time_last),
+                                     self.duration, self.document_number)
+        return data
 
     def check_session(self, duration):
         """
@@ -291,9 +274,9 @@ class Session(object):
         :return: Returns the string representation of the session if inactive, None if active
         """
         # session existed, update session
-        if duration.seconds > self.inactivity_period:  # Checks if session is still active
+        if duration.total_seconds() > self.inactivity_period:  # Checks if session is still active
             # close this session
-            return self.close_session()
+            return str(self)
         else:
             return None
 
@@ -344,3 +327,13 @@ class PublicEDGARLogFiles(object):
             fh.write(r)
         z = zipfile.ZipFile(io.BytesIO(r))
         z.extractall(self.storage_dir)
+
+
+if __name__ == '__main__':
+    log = sys.argv[1]
+    inactivity = sys.argv[2]
+    output = sys.argv[3]
+    sessionizationObj = Sessionization(log_file=log,
+                                       inactivity_period=inactivity,
+                                       output_file=output)
+    sessionizationObj.run()
