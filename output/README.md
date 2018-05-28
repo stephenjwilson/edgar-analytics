@@ -1,1 +1,1 @@
-This directory is where we would expect your program to write the requested output files.
+This is where the output of the sessionization library will be written if ./run.sh is used.

@@ -1,0 +1,1 @@
+This test assess the ability of the algorithm to use an inactivity period of 24 hours.

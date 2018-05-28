@@ -7,7 +7,6 @@ Unittests for sessionization
 import unittest
 import os
 import hashlib
-
 from src import sessionization
 
 
@@ -90,5 +89,4 @@ class SessionizationTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    import sys
     unittest.main()

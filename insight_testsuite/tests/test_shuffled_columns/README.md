@@ -1,0 +1,1 @@
+This test checks that shuffled columns do not break the sessionization.

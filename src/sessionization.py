@@ -27,7 +27,7 @@ import os
 import re
 import sys
 import datetime
-from IPython import embed
+
 
 class Sessionization(object):
     """Processes the EDGAR log files.
@@ -126,7 +126,7 @@ class Sessionization(object):
         # Get the indices of the fields to extract
         header_map = {}
         for field in self._extracted_fields:
-            header_map[field] = self._extracted_fields.index(field)
+            header_map[field] = self.header.index(field)
 
         # Return cleaned data
         for row in stream:
@@ -240,7 +240,6 @@ class Session(object):
         self.time_last = time_first
         self.duration = duration
         self.document_number = document_number
-        self.delimiter = ','
 
     def _format_datetime(self, s):
         """
