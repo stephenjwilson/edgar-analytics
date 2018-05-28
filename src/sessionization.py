@@ -7,9 +7,9 @@ inactivity_period is simply an int stored on a single line of the file.
 
 Example:
         import sessionization
-        log_file = './input/log.csv'
-        inactivity_period = './input/inactivity_period.txt'
-        output_file = './output/sessionization.txt'
+        log_file = '../input/log.csv'
+        inactivity_period = '../input/inactivity_period.txt'
+        output_file = '../output/sessionization.txt'
         sessionizationObj = sessionization.Sessionization(log_file=log_file,
                                                             inactivity_period=inactivity_period,
                                                             output_file=output_file)
@@ -20,13 +20,13 @@ __author__ = "Stephen J. Wilson"
 __version__ = "1.0.1"
 __email__ = "contact@stephenjwilson.com"
 
-import urllib.request
-import zipfile
+import datetime
 import io
 import os
 import re
 import sys
-import datetime
+import urllib.request
+import zipfile
 
 
 class Sessionization(object):
@@ -39,14 +39,13 @@ class Sessionization(object):
 
      Example:
         import sessionization
-        log_file = './input/log.csv'
-        inactivity_period = './input/inactivity_period.txt'
-        output_file = './output/sessionization.txt'
+        log_file = '../input/log.csv'
+        inactivity_period = '../input/inactivity_period.txt'
+        output_file = '../output/sessionization.txt'
         sessionizationObj = sessionization.Sessionization(log_file=log_file,
                                                             inactivity_period=inactivity_period,
                                                             output_file=output_file)
         sessionizationObj.run()
-
     """
 
     def __init__(self, log_file='./input/log.csv', inactivity_period='./input/inactivity_period.txt',
@@ -78,14 +77,14 @@ class Sessionization(object):
         self.header = ''
 
         # Private Constants
-        self._extracted_fields = ['ip', 'date', 'time']# 'cik', 'accession', 'extention']
+        self._extracted_fields = ['ip', 'date', 'time']  # 'cik', 'accession', 'extention']
         self._reDT = re.compile(r'(\d{4})-(\d{2})-(\d{2})(\d{2}):(\d{2}):(\d{2})')
         self._quote_character = '"'
         self._delimiter = ','
 
     def run(self):
         """
-        Processes the EDGAR log file.
+        Processes the EDGAR log file. This is the main function to trigger an analysis of the input files.
         """
         with open(self.log_file, 'r') as stream:
             stream = self.cleanse(stream)
@@ -107,7 +106,7 @@ class Sessionization(object):
             row_data[field] = row[header_map[field]]  # Access the appropriate row according to the header
 
         # Get datetime objects from the date and time information
-        datetime_object = datetime.datetime(*map(int, self._reDT.match(row_data['date']+row_data['time']).groups()))
+        datetime_object = datetime.datetime(*map(int, self._reDT.match(row_data['date'] + row_data['time']).groups()))
         row_data['dt'] = datetime_object
         return row_data
 
@@ -231,8 +230,6 @@ class Session(object):
         :param time_first: This is the time a session starts
         :param duration: This is the duration of a session, defaults to 1.
         :param document_number: The number of documents requested in a session, defaults to 1.
-        :param time_format: This is the format of the time in the files, defaults to '%H:%M:%S'.
-        :param date_format: This is the format of the date in the files, defaults to '%Y-%m-%d'.
         """
         self.inactivity_period = inactivity_period
         self.ip = ip

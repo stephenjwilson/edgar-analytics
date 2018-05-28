@@ -3,10 +3,10 @@ import sys
 
 
 def example(log_file, inactivity_period, output_file):
-    sessionizationObj = sessionization.Sessionization(log_file=log_file,
-                                                      inactivity_period=inactivity_period,
-                                                      output_file=output_file)
-    sessionizationObj.run()
+    sessionization_obj = sessionization.Sessionization(log_file=log_file,
+                                                       inactivity_period=inactivity_period,
+                                                       output_file=output_file)
+    sessionization_obj.run()
 
 
 if __name__ == '__main__':

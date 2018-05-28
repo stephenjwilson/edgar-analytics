@@ -2,7 +2,9 @@
 1. [Introduction](README.md#introduction)
 2. [Approach](README.md#approach)
 3. [Requirements](README.md#requirements)
-4. [Author](README.md#author)
+4. [Running the code](README.md#running-the-code:)
+5. [Testing](README.md#testing-the-code:)
+6. [Author](README.md#author)
 
 # Introduction
 This Repository was created to submit to the [Insight Data Engineering Coding Challenge](https://github.com/InsightDataScience/edgar-analytics).
@@ -63,3 +65,6 @@ They can be run separately by running:
 ```bash
 python setup.py test
 ``` 
+
+# Author
+Created by Stephen J. Wilson
