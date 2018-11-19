@@ -53,8 +53,8 @@ class Sessionization(object):
         """Constructor for the Sessionization object
 
         :param log_file: This is the path to a EDGAR log file in csv format. See the \
-        [SEC website](https://www.sec.gov/dera/data/edgar-log-file-data-set.html) for mor detail.
-        :param inactivity_period: This is plain text file containing a single line with a single int value.
+        [SEC website](https://www.sec.gov/dera/data/edgar-log-file-data-set.html) for more detail
+        :param inactivity_period: This is plain text file containing a single line with a single int value
         :param output_file: The file path for the output
 
 
@@ -114,11 +114,12 @@ class Sessionization(object):
         """
         Cleans and parses the data from the data stream
         :param stream: The file data stream. The first line of the file should be a header
-        :return: Yields rows that are cleaned and in dictionary format. See clean_row.
+        :return: Yields rows that are cleaned and in dictionary format. See clean_row
         """
 
         # Set header
         self.header = stream.readline().strip().split(self._delimiter)
+        
         # Ensure all fields are in the header
         assert (len(self._extracted_fields) == len(set(self.header).intersection(self._extracted_fields)))
 
@@ -143,7 +144,7 @@ class SessionSet(object):
         """ Constructor of the Session Set
 
         :param output_file: This is the file path to the output
-        :param inactivity_period: This is the int (in seconds) of the inactivity period.
+        :param inactivity_period: This is the int (in seconds) of the inactivity period
         """
         self.output_file = output_file
         self.inactivity_period = inactivity_period
@@ -154,7 +155,7 @@ class SessionSet(object):
 
     def __del__(self):
         """
-        This is the clean-up of the SessionSet object when deleted. Tt closes all sessions when the class it deleted.
+        This is the clean-up of the SessionSet object when deleted. It closes all sessions when the class is deleted
         This is relevant behaviour for the EOF or the end of a data stream. Additionally, it closes the output file
         opened in the initialization.
         """
@@ -296,8 +297,8 @@ class PublicEDGARLogFiles(object):
     def __init__(self, log_index, storage_dir):
         """
         The constructor of the PublicEDGARLogFiles class.
-        :param log_index: Takes a csv version of the log file that contains all urls for the log files.
-        :param storage_dir: The path to store all the log files.
+        :param log_index: Takes a csv version of the log file that contains all urls for the log files
+        :param storage_dir: The path to store all the log files
         """
         self.log_index = log_index
         self.log_urls = []
@@ -313,8 +314,7 @@ class PublicEDGARLogFiles(object):
     def get_log(self, log_url):
         """
         Downloads and unzips the log file at log_url
-        :param log_url: This is a url of the zipped log.
-        :return:
+        :param log_url: This is a url of the zipped log
         """
         f = urllib.request.urlopen(log_url)
         r = f.read()
