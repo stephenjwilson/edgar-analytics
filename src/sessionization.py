@@ -162,6 +162,7 @@ class SessionSet(object):
         # Close any active sessions
         for session in self.sessions:
             self.output_file_fh.write(str(session))
+
         # Close the file
         self.output_file_fh.close()
         # Delete the data
@@ -226,11 +227,11 @@ class Session(object):
         See (datetime documentation)[https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior] for
         details of the time_format and date_format.
 
-        :param inactivity_period: This is the int (in seconds) of the inactivity period.
+        :param inactivity_period: This is the int (in seconds) of the inactivity period
         :param ip: The IP address that uniquely identifies a session
         :param time_first: This is the time a session starts
-        :param duration: This is the duration of a session, defaults to 1.
-        :param document_number: The number of documents requested in a session, defaults to 1.
+        :param duration: This is the duration of a session, defaults to 1
+        :param document_number: The number of documents requested in a session, defaults to 1
         """
         self.inactivity_period = inactivity_period
         self.ip = ip
@@ -280,7 +281,7 @@ class Session(object):
     def update_session(self, current_time):
         """
         This function updates the current session with a new request.
-        :param current_time: a datetime object of the current time to be stored as the last time the session was active.
+        :param current_time: a datetime object of the current time to be stored as the last time the session was active
         """
         self.document_number += 1  # Updates the number of documents retrieved, where one line is one document
         self.time_last = current_time  # Updates the time the session was last active

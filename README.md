@@ -20,7 +20,7 @@ I ignored the document being retrieved at each request, as duplicate document re
 
 The Session class:
  * Stores all important information about a session
- * Formats data for output, 
+ * Formats data for output
  * Updates the session as needed
  * Provides a function to assess if the session has ended
 
